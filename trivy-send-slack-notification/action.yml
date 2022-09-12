@@ -63,7 +63,7 @@ runs:
         TAG: ${{ inputs.tag }}
         PR_URL: ${{ steps.pr.outputs.url }}
         COLOR_ATTACHMENT: '#D94346'
-        TEXT: 'Security Issues was found on PR ${{ steps.find_pr.outputs.number }}' 
+        TEXT: 'Security Issues was found on PR - ${{ steps.find_pr.outputs.title }} number:#${{ steps.find_pr.outputs.number }}' 
         ADDITIONAL_HEADER_INFO: 
       run: |
         curl -s -X POST ${{ inputs.slack_webhook_url }} \
