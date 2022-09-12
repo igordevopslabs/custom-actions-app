@@ -1,0 +1,131 @@
+name: "Slack Deploy App Notification"
+description: "Sends a notification to slack channel #stonks-deploys"
+inputs:
+  
+  slack_webhook_url:
+    description: 'The URL of Slack Webhook.'
+    required: true
+  
+  deploy_status_text:
+    description: 'Status of Deploy (must be "success" or "failure").'
+    required: true
+  
+  deploy_environment:
+    description: 'Deploy environment/aws account.'
+    required: true
+
+  github_token:
+    description: 'GitHub Token for API calls.'
+    required: true
+
+  custom_header_title:
+    description: 'Custom header information (i.e. The Helm release name instead of the repository name).'
+    required: false
+
+  tag:
+    description: 'Deploy tag.'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get PR Number
+      uses: jwalton/gh-find-current-pr@v1
+      id: find_pr
+      with:
+        github-token: ${{ inputs.github_token }}
+        state: open
+
+    #------------------------------------------------------------------------
+    # Use to get 'deployed' and 'rollback' status from Helm.
+    # It'll be applied in upcomming releases...
+    #------------------------------------------------------------------------
+    #
+    # - name: Export Helm Info
+    #   id: helm
+    #   shell: bash
+    #   run: | 
+    #     export RELEASE_NAME=$(helm list | tail -1 | sed 's/\t/%/g' | cut -d'%' -f 1)
+    #     #export HELM_STATUS=$(helm history "$RELEASE_NAME" | tail -1 | sed 's/\t/%/g' | sed 's/ //g' | cut -d'%' -f 3)
+    #     echo "::set-output name=status::$HELM_STATUS"             
+    #-------------------------------------------------------------------------
+
+    - name: Export PR Info
+      id: pr
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        PR_NUMBER: ${{ steps.find_pr.outputs.number }}
+      run: | 
+        export USER_LOGIN=$(curl -X GET -H "Accept: application/vnd.github.v3+json" -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER | jq -r .user.login)
+        echo "::set-output name=author::$USER_LOGIN"  
+        echo "::set-output name=url::https://github.com/${{ github.repository }}/pull/${{ steps.find_pr.outputs.number }}"        
+
+    - name: Slack Notification
+      shell: bash
+      env:
+        DEPLOY_ACTOR: ${{ steps.pr.outputs.author }}
+        JOB_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        APP_NAME: ${{ inputs.custom_header_title || github.repository }}
+        TAG: ${{ inputs.tag }}
+        PR_URL: ${{ steps.pr.outputs.url }}
+        # COLOR_ATTACHMENT: ${{ inputs.deploy_status_text == 'success' && '#00A868' || steps.helm.outputs.status == 'rollback' || '#FFD962' || '#D94346' }}
+        COLOR_ATTACHMENT: '#D94346'
+        STATUS_TEXT: 'Some vulnerabilities was found' 
+        ADDITIONAL_HEADER_INFO: 
+      run: |
+        curl -s -X POST ${{ inputs.slack_webhook_url }} \
+          -H 'Content-Type: application/json' \
+          -d @- <<BODY    
+          { 
+            "channel": "C03AJMEUN4W", 
+            "attachments": [ 
+              { 
+                "color": "$COLOR_ATTACHMENT", 
+                "blocks": [ 
+                  { 
+                    "type": "header", 
+                    "text": { 
+                      "type": "plain_text", 
+                      "text": "$APP_NAME" 
+                    } 
+                  },  
+                  { 
+                    "type": "section", 
+                    "text": { 
+                      "type": "mrkdwn", 
+                      "text": "Tag/Branch: *$TAG*\nCriado por: *$DEPLOY_ACTOR*" 
+                    } 
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "style": "primary",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "Github PR"
+                        },
+                        "value": "link_pr",
+                        "url": "$PR_URL",
+                        "action_id": "actionId-0"
+                      },
+                      {
+                        "type": "button",
+                        "style": "primary",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "Github Actions"
+                        },
+                        "value": "link_job",
+                        "url": "$JOB_URL",
+                        "action_id": "actionId-2"
+                      }
+                    ]
+                  }, 
+                ] 
+              } 
+            ] 
+          }
+        BODY
