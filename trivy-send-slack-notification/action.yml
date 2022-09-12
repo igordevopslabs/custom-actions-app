@@ -57,14 +57,13 @@ runs:
     - name: Slack Notification
       shell: bash
       env:
-        DEPLOY_ACTOR: ${{ steps.pr.outputs.author }}
+        AUTHOR: ${{ steps.pr.outputs.author }}
         JOB_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         APP_NAME: ${{ inputs.custom_header_title || github.repository }}
         TAG: ${{ inputs.tag }}
         PR_URL: ${{ steps.pr.outputs.url }}
-        # COLOR_ATTACHMENT: ${{ inputs.deploy_status_text == 'success' && '#00A868' || steps.helm.outputs.status == 'rollback' || '#FFD962' || '#D94346' }}
         COLOR_ATTACHMENT: '#D94346'
-        STATUS_TEXT: 'Some vulnerabilities was found' 
+        TEXT: 'Security Issues was found on PR ${{ steps.find_pr.outputs.number }}' 
         ADDITIONAL_HEADER_INFO: 
       run: |
         curl -s -X POST ${{ inputs.slack_webhook_url }} \
@@ -87,7 +86,7 @@ runs:
                     "type": "section", 
                     "text": { 
                       "type": "mrkdwn", 
-                      "text": "Tag/Branch: *$TAG*\nCriado por: *$DEPLOY_ACTOR*" 
+                      "text": "Tag/Branch: *$TAG*\nCriado por: *AUTHOR*" 
                     } 
                   },
                   {
