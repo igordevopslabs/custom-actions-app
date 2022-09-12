@@ -19,6 +19,10 @@ inputs:
     required: false
     default: 'main'
 
+  scan_type:
+    description: 'Scan type (i.e. trivy fs, trivy iac, trivy container image)'
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -63,7 +67,7 @@ runs:
         TAG: ${{ inputs.tag }}
         PR_URL: ${{ steps.pr.outputs.url }}
         COLOR_ATTACHMENT: '#D94346'
-        TEXT: 'Security Issues was found by Trivy fs scan' 
+        TEXT: 'Issues was found by ${{ inputs.scan_type}} scan' 
         ADDITIONAL_HEADER_INFO: 
       run: |
         curl -s -X POST ${{ inputs.slack_webhook_url }} \
@@ -86,7 +90,7 @@ runs:
                     "type": "section", 
                     "text": { 
                       "type": "mrkdwn", 
-                      "text": "External deps scan: *$TEXT*\n PR Title: *$${{ steps.find_pr.outputs.title }}*\nCriado por: *$AUTHOR*" 
+                      "text": "Security Scan: *$TEXT*\n PR Title: *$${{ steps.find_pr.outputs.title }}*\nCriado por: *$AUTHOR*" 
                     } 
                   },
                   {
