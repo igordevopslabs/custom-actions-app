@@ -86,7 +86,7 @@ runs:
                     "type": "section", 
                     "text": { 
                       "type": "mrkdwn", 
-                      "text": "Tag/Branch: *$TAG*\nCriado por: *AUTHOR*" 
+                      "text": "Trivy Scan: *TEXT*\n Tag/Branch: *$TAG*\nCriado por: *$AUTHOR*" 
                     } 
                   },
                   {
