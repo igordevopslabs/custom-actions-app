@@ -41,7 +41,7 @@ runs:
         EOL
 
     - name: Create SecretChecks.toml file
-      id: create_file
+      id: read_file
       shell: bash
       run: |
         cat SecretChecks.toml
