@@ -2773,3 +2773,9 @@ runs:
       shell: bash
       run: |
         cat SecretChecks.toml
+
+    - name: Create SecretChecks.toml file
+      id: run
+      shell: bash
+      run: |
+        docker run -v $PWD:/path zricethezav/gitleaks:latest --source="/path" detect --log-level warn --redact --verbose --redact --config --config /github/workspace/SecretChecks.toml
