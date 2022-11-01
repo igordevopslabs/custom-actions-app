@@ -2767,9 +2767,3 @@ runs:
             "zendesk",
         ]
         EOL
-
-    - name: Run Gitleaks
-      id: run
-      shell: bash
-      run: |
-        docker run -v $GITHUB_WORKSPACE:/path zricethezav/gitleaks:latest --source="/path" detect --log-level warn --redact --verbose --redact -c /path/SecretChecks.toml --exit-code 0 --no-banner
