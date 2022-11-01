@@ -322,5 +322,4 @@ runs:
           commits = []
           paths = []
           repos = []
-
         EOL      
