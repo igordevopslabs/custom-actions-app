@@ -5,6 +5,8 @@ runs:
   using: "composite"
   steps:
     - name: Create SecretChecks.toml file
+      id: create_file
+      shell: bash
       run: |
         cat >SecretChecks.toml <<EOL
           title = "gitleaks config"
