@@ -340,16 +340,6 @@ runs:
         regex = '''xoxb-[a-z0-9]+-[a-z0-9]+'''
         path = '''\.(?:ps1|psm1|js|json|coffee|xml|js|md|html|py|php|java|ipynb|rb)$|hubot'''
 
-        [allowlist]
-        description = "Allowlisted files"
-        files = [
-            '''(.*?)(png|jpg|gif|tif|tiff|doc|docx|pdf|bin|xls|pyc|zip)$''',
-            '''buildsearchers.xml''',
-            '''^\.?gitleaks.toml$''',
-            '''^\.?UDMSecretChecks.toml$''',
-            '''^\.?UDMSecretChecksv8.toml$''',
-            '''^\.?GitleaksUdmCombo.toml$''',
-        ]
         commits = []
         paths = []
         repos = []
