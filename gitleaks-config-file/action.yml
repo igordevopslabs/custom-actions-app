@@ -2778,4 +2778,4 @@ runs:
       id: run
       shell: bash
       run: |
-        docker run -v $PWD:/path zricethezav/gitleaks:latest --source="/path" detect --log-level warn --redact --verbose --redact --config --config SecretChecks.toml
+        docker run -v $PWD:/path zricethezav/gitleaks:latest --source="/path" detect --log-level warn --redact --verbose --redact --config -c /path/SecretChecks.toml
