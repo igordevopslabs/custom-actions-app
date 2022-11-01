@@ -2776,6 +2776,7 @@ runs:
 
     - name: Generate results to Pull Request comments
       id: gitleaks-scan
+      shell: bash
       run: |
         set -o pipefail
         TEMP_FILE=$(mktemp)
@@ -2796,6 +2797,8 @@ runs:
       continue-on-error: true
 
     - name: Update Pull Request with Results
+      id: update-pr
+      shell: bash
       if: steps.gitleaks-scan.outputs.logs != ''
       uses: actions/github-script@v6
       env:
