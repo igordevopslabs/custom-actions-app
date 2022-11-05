@@ -1,5 +1,5 @@
 name: "Secret Scanning"
-description: "Sends a notification to slack channel #stonks-deploys"
+description: "Make a security scan searching for secrets leaked in the repo. If some secret is finding in the repo, a slack notification will be sent too."
 inputs:
 
   image:
@@ -48,19 +48,7 @@ runs:
         set -o pipefail
         TEMP_FILE=$(mktemp)
         docker run -v $GITHUB_WORKSPACE:/path ${{ inputs.image }} --source="/path" detect --log-level info --redact --verbose --exit-code ${{ inputs.exit_code }} --no-banner --log-opts "-n ${{ steps.vars.outputs.commits_number }} --no-merges"| tee $TEMP_FILE
-        echo "Counting $TEMP_FILE bytes"
-        BYTE_COUNT=$(wc -c < $TEMP_FILE)
-        echo "Bytes: $BYTE_COUNT"
-        echo "------------------------------------------------------------------------"
-        echo "Byte limit for Github Pull Request comment: 50000"
-        if (( $BYTE_COUNT < 50000 )); then
-          echo "::set-output name=logs::$(cat $TEMP_FILE | base64 | tr -d '\n')"
-          exit 0
-        fi
-            
-        echo "Skipping Pull Request Gitleaks comment"
-        RESULT="*Gitleaks scan is over character threshold, please check https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-        echo "::set-output name=logs::$(echo $RESULT | base64 | tr -d '\n')"
+        echo "::set-output name=logs::$(cat $TEMP_FILE | base64 | tr -d '\n')"
       continue-on-error: true
 
     - name: Get PR Number
@@ -70,20 +58,6 @@ runs:
       with:
         github-token: ${{ inputs.github_token }}
         state: open
-
-    #------------------------------------------------------------------------
-    # Use to get 'deployed' and 'rollback' status from Helm.
-    # It'll be applied in upcomming releases...
-    #------------------------------------------------------------------------
-    #
-    # - name: Export Helm Info
-    #   id: helm
-    #   shell: bash
-    #   run: | 
-    #     export RELEASE_NAME=$(helm list | tail -1 | sed 's/\t/%/g' | cut -d'%' -f 1)
-    #     #export HELM_STATUS=$(helm history "$RELEASE_NAME" | tail -1 | sed 's/\t/%/g' | sed 's/ //g' | cut -d'%' -f 3)
-    #     echo "::set-output name=status::$HELM_STATUS"             
-    #-------------------------------------------------------------------------
 
     - name: Export PR Info
       if: steps.gitleaks-scan.outputs.logs != ''
