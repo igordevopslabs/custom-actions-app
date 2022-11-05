@@ -109,7 +109,7 @@ runs:
         -X PATCH \
         -H "Accept: application/vnd.github+json" \ 
         -H "Authorization: token $GITHUB_TOKEN" \
-        https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER \
+        ${{ steps.pr.outputs.url }} \
         -d '{"body":"There is one or more secrets leaked in this PR. Please, see the job details"}'        
 
     - name: Slack Notification
