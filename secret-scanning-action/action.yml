@@ -38,6 +38,7 @@ runs:
   steps:
     - name: Set outputs to number of commits
       id: vars
+      shell: bash
       run: echo "::set-output name=commits_number::$(git rev-list origin/${{ github.base_ref }}..HEAD --count)"
 
     - name: Run Gitleaks
