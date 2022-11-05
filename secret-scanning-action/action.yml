@@ -20,10 +20,6 @@ inputs:
     description: 'GitHub Token for API calls.'
     required: true
 
-  custom_header_title:
-    description: 'Custom header information (i.e. The Helm release name instead of the repository name).'
-    required: false
-
   tag:
     description: 'Deploy tag.'
     required: false
