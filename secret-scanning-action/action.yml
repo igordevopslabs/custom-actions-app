@@ -105,11 +105,11 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github_token }}
       run: |
         curl \
-        -X PATCH \
-        -H "Accept: application/vnd.github+json" \ 
-        -H "Authorization: Bearer $GITHUB_TOKEN" \
-        https://api.github.com/repos/${{ github.repository }}/pulls/${{ steps.find_pr.outputs.number }} \
-        -d '{"body":"There is one or more secrets leaked in this PR. Please, see the job details"}'        
+          -X PATCH \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer $GITHUB_TOKEN" \
+          https://api.github.com/repos/${{ github.repository }}/pulls/${{ steps.find_pr.outputs.number }} \
+          -d '{"body":"There is one or more secrets leaked in this PR. Please, see the job details","state":"open","base":"${{ github.base_ref }}"}'        
 
     - name: Slack Notification
       if: steps.gitleaks-scan.outputs.logs != ''
