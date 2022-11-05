@@ -83,7 +83,7 @@ runs:
           -H "Accept: application/vnd.github+json" \
           -H "Authorization: Bearer $GITHUB_TOKEN" \
           https://api.github.com/repos/${{ github.repository }}/pulls/${{ steps.find_pr.outputs.number }} \
-          -d '{"body":"There is one or more secrets leaked in this PR. Please, see the job details.\n\nTo cleanup secrets from repo, see this link: https://rtyley.github.io/bfg-repo-cleaner/","state":"open","base":"${{ github.base_ref }}"}'        
+          -d '{"body":":poop: There is one or more secrets leaked in this PR. Please, see the secret scanning job details.\n\n:pencil2: To cleanup secrets from this repo, you can see this link: https://rtyley.github.io/bfg-repo-cleaner/","state":"open","base":"${{ github.base_ref }}"}'        
 
     - name: Slack Notification
       if: steps.gitleaks-scan.outputs.logs != ''
