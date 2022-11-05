@@ -103,13 +103,12 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
-        PR_NUMBER: ${{ steps.find_pr.outputs.number }}
       run: |
         curl \
         -X PATCH \
         -H "Accept: application/vnd.github+json" \ 
         -H "Authorization: token $GITHUB_TOKEN" \
-        ${{ steps.pr.outputs.url }} \
+        https://api.github.com/repos/${{github.repository_owner}}/${{ github.repository }}/pulls/${{ steps.find_pr.outputs.number }} \
         -d '{"body":"There is one or more secrets leaked in this PR. Please, see the job details"}'        
 
     - name: Slack Notification
