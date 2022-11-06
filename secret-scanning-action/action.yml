@@ -51,7 +51,6 @@ runs:
         TEMP_FILE=$(mktemp)
         docker run -v $GITHUB_WORKSPACE:/path $IMAGE --source="/path" detect --log-level info --redact --verbose --exit-code $EXIT_CODE --no-banner --log-opts "-n $COMMIT_NUMBER --no-merges"| tee $TEMP_FILE
         echo "::set-output name=logs::$(cat $TEMP_FILE | base64 | tr -d '\n')"
-      continue-on-error: true
 
     - name: Get PR Number
       if: steps.gitleaks-scan.outputs.logs != ''
