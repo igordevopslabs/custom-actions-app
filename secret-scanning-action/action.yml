@@ -40,10 +40,14 @@ runs:
     - name: Run Gitleaks
       id: gitleaks-scan
       shell: bash
+      env:
+        IMAGE: ${{ inputs.image }}
+        EXIT_CODE: ${{ inputs.exit_code }}
+        COMMIT_NUMBER: ${{ steps.vars.outputs.commits_number }}
       run: |
         set -o pipefail
         TEMP_FILE=$(mktemp)
-        docker run -v $GITHUB_WORKSPACE:/path ${{ inputs.image }} --source="/path" detect --log-level info --redact --verbose --exit-code ${{ inputs.exit_code }} --no-banner --log-opts "-n ${{ steps.vars.outputs.commits_number }} --no-merges"| tee $TEMP_FILE
+        docker run -v $GITHUB_WORKSPACE:/path $IMAGE --source="/path" detect --log-level info --redact --verbose --exit-code $EXIT_CODE --no-banner --log-opts "-n $COMMIT_NUMBER --no-merges"| tee $TEMP_FILE
         echo "::set-output name=logs::$(cat $TEMP_FILE | base64 | tr -d '\n')"
       continue-on-error: true
 
@@ -73,12 +77,14 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
+        REPO: ${{ github.repository }}
+        PR_NUMBER: ${{ steps.find_pr.outputs.number }}
       run: |
         curl \
           -X PATCH \
           -H "Accept: application/vnd.github+json" \
           -H "Authorization: Bearer $GITHUB_TOKEN" \
-          https://api.github.com/repos/${{ github.repository }}/pulls/${{ steps.find_pr.outputs.number }} \
+          https://api.github.com/repos/$REPO/pulls/$PR_NUMBER \
           -d '{"body":":poop: There is one or more secrets leaked in this PR. Please, see the secret scanning job details.\n\n:pencil2: To cleanup secrets from this repo, you can see this link: https://rtyley.github.io/bfg-repo-cleaner/","state":"open","base":"${{ github.base_ref }}"}'        
 
     - name: Slack Notification
